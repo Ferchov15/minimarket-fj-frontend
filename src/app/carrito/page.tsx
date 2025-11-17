@@ -1,79 +1,167 @@
 "use client";
 
 import Navbar from "../components/Navbar";
-import CategoryBar from "../components/CategoryBar";
+import { useCart } from "../../context/CartContext";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 
 export default function CarritoPage() {
-    return (
-        <div className="min-h-screen bg-white text-black">
-            <Navbar />
-            <CategoryBar />
+  const { cartItems, removeFromCart, clearCart, updateCart } = useCart();
+  const [nombreCliente, setNombreCliente] = useState("");
 
-            <main className="flex flex-col items-center p-6">
-                <h1 className="text-xl font-semibold mb-4">Su carrito de compra:</h1>
+  // ✅ Consolidar productos repetidos (mismo id → sumar cantidad)
+  useEffect(() => {
+    if (Array.isArray(cartItems) && cartItems.length > 0) {
+      const productosUnicos = cartItems.reduce((acc, item) => {
+        const existente = acc.find((p) => p.id === item.id);
+        if (existente) {
+          existente.quantity += item.quantity;
+        } else {
+          acc.push({ ...item });
+        }
+        return acc;
+      }, [] as typeof cartItems);
 
-                <div className="flex flex-col md:flex-row items-center md:items-start gap-10">
-                    {/* Ícono de carrito */}
-                    <div className="text-center">
-                        <img
-                            src="https://cdn-icons-png.flaticon.com/512/107/107831.png"
-                            alt="Carrito"
-                            className="w-40 h-40 mx-auto"
-                        />
-                    </div>
+      if (productosUnicos.length !== cartItems.length) {
+        updateCart(productosUnicos); // actualiza el contexto solo si hubo duplicados
+      }
+    }
+  }, [cartItems, updateCart]);
 
-                    {/* Tabla del carrito */}
-                    <table className="border border-gray-400 text-center">
-                        <thead>
-                            <tr className="bg-purple-300">
-                                <th className="border px-4 py-2">Productos</th>
-                                <th className="border px-4 py-2">Cantidad</th>
-                                <th className="border px-4 py-2">Precio</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr className="bg-purple-200">
-                                <td className="border px-4 py-2">Papitas</td>
-                                <td className="border px-4 py-2">2</td>
-                                <td className="border px-4 py-2">$1.30</td>
-                            </tr>
-                            <tr className="bg-purple-100">
-                                <td className="border px-4 py-2">Yogurt</td>
-                                <td className="border px-4 py-2">1</td>
-                                <td className="border px-4 py-2">$0.75</td>
-                            </tr>
-                            <tr className="bg-purple-200">
-                                <td className="border px-4 py-2">Pan</td>
-                                <td className="border px-4 py-2">20</td>
-                                <td className="border px-4 py-2">$1.30</td>
-                            </tr>
-                            <tr className="bg-purple-100">
-                                <td className="border px-4 py-2">Helado</td>
-                                <td className="border px-4 py-2">2</td>
-                                <td className="border px-4 py-2">$2.00</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+  // ✅ Evitar error si cartItems está vacío o indefinido
+  const total = Array.isArray(cartItems)
+    ? cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    : 0;
 
-                {/* Campo de nombre y botones */}
-                <div className="mt-6 flex flex-col md:flex-row items-center gap-4">
-                    <input
-                        type="text"
-                        placeholder="Ingrese su nombre"
-                        className="border border-gray-400 rounded-md p-2 w-64"
-                    />
-                    <div className="flex gap-4 mt-3 md:mt-0">
-                        <Link href="/" className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
-                            Seguir comprando
-                        </Link>
-                        <button className="bg-indigo-700 hover:bg-indigo-800 text-white font-semibold px-6 py-2 rounded-md">
-                            Confirmar
+  // ✅ Confirmar pedido con verificación y guardado en BD
+  const handleConfirmar = async () => {
+    if (!nombreCliente.trim()) {
+      alert("⚠️ Por favor, ingrese su nombre antes de confirmar el pedido.");
+      return;
+    }
+
+    try {
+      const pedido = {
+        nombreCliente,
+        total,
+        productos: cartItems.map((item) => ({
+          id: item.id_real ?? item.id, // usa id_real si existe
+          nombre: item.name,
+          cantidad: item.quantity,
+          precio: item.price,
+        })),
+      };
+
+      console.log("📦 Enviando pedido al backend:", pedido);
+
+      const res = await fetch("http://localhost:4000/api/pedidos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pedido),
+      });
+
+      if (!res.ok) throw new Error("Error al guardar el pedido en la base de datos");
+
+      clearCart();
+      alert(`✅ Pedido registrado correctamente para ${nombreCliente}.`);
+    } catch (error) {
+      console.error(error);
+      alert("❌ No se pudo guardar el pedido. Intente nuevamente.");
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white text-black">
+      <Navbar />
+
+      <main className="flex flex-col items-center p-6">
+        <h1 className="text-xl font-semibold mb-4">Su carrito de compra:</h1>
+
+        {cartItems.length === 0 ? (
+          <div className="text-center mt-10">
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/107/107831.png"
+              alt="Carrito vacío"
+              className="w-56 h-56 mx-auto opacity-70"
+            />
+            <p className="mt-4 text-lg text-gray-600">
+              Su carrito está vacío.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-10">
+              <div className="text-center">
+                <img
+                  src="https://cdn-icons-png.flaticon.com/512/107/107831.png"
+                  alt="Carrito"
+                  className="w-40 h-40 mx-auto"
+                />
+              </div>
+
+              <table className="border border-gray-400 text-center">
+                <thead>
+                  <tr className="bg-purple-300">
+                    <th className="border px-4 py-2">Eliminar</th>
+                    <th className="border px-4 py-2">Producto</th>
+                    <th className="border px-4 py-2">Cantidad</th>
+                    <th className="border px-4 py-2">Precio</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cartItems.map((item) => (
+                    <tr key={item.id} className="bg-purple-100">
+                      <td className="border px-4 py-2">
+                        <button
+                          onClick={() => removeFromCart(item.id)}
+                          className="text-red-600 hover:text-red-800 font-bold text-lg"
+                        >
+                          🗑️
                         </button>
-                    </div>
-                </div>
-            </main>
-        </div>
-    );
+                      </td>
+                      <td className="border px-4 py-2">{item.name}</td>
+                      <td className="border px-4 py-2">{item.quantity}</td>
+                      <td className="border px-4 py-2">
+                        ${(item.price * item.quantity).toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-6 flex flex-col md:flex-row items-center gap-4">
+              <h2 className="text-lg font-bold">
+                Total: ${total.toFixed(2)}
+              </h2>
+
+              <input
+                type="text"
+                placeholder="Ingrese su nombre"
+                value={nombreCliente}
+                onChange={(e) => setNombreCliente(e.target.value)}
+                className="border border-gray-400 rounded-md p-2 w-64"
+              />
+
+              <div className="flex gap-4 mt-3 md:mt-0">
+                <Link
+                  href="/"
+                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                >
+                  Seguir comprando
+                </Link>
+
+                <button
+                  className="bg-indigo-700 hover:bg-indigo-800 text-white font-semibold px-6 py-2 rounded-md"
+                  onClick={handleConfirmar}
+                >
+                  Confirmar
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+      </main>
+    </div>
+  );
 }

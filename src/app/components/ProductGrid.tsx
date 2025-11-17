@@ -2,9 +2,10 @@ import ProductCard from './ProductCard'
 
 interface Product {
   name: string
+  descripcion?: string
   price: number
-  code: string
   image: string
+  stock?: number
 }
 
 export default function ProductGrid({ products }: { products: Product[] }) {
