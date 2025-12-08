@@ -84,7 +84,7 @@ export default function Navbar() {
         href="/admin"
         className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition"
       >
-        Admin
+        Iniciar Sesion
       </Link>
     </header>
   );

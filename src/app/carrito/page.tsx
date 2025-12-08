@@ -3,37 +3,18 @@
 import Navbar from "../components/Navbar";
 import { useCart } from "../../context/CartContext";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function CarritoPage() {
-  const { cartItems, removeFromCart, clearCart, updateCart } = useCart();
+  const { cartItems, removeFromCart, clearCart } = useCart();
   const [nombreCliente, setNombreCliente] = useState("");
 
-  // ✅ Consolidar productos repetidos (mismo id → sumar cantidad)
-  useEffect(() => {
-    if (Array.isArray(cartItems) && cartItems.length > 0) {
-      const productosUnicos = cartItems.reduce((acc, item) => {
-        const existente = acc.find((p) => p.id === item.id);
-        if (existente) {
-          existente.quantity += item.quantity;
-        } else {
-          acc.push({ ...item });
-        }
-        return acc;
-      }, [] as typeof cartItems);
-
-      if (productosUnicos.length !== cartItems.length) {
-        updateCart(productosUnicos); // actualiza el contexto solo si hubo duplicados
-      }
-    }
-  }, [cartItems, updateCart]);
-
-  // ✅ Evitar error si cartItems está vacío o indefinido
+  // Calcular total correctamente
   const total = Array.isArray(cartItems)
     ? cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
     : 0;
 
-  // ✅ Confirmar pedido con verificación y guardado en BD
+  // Confirmar pedido
   const handleConfirmar = async () => {
     if (!nombreCliente.trim()) {
       alert("⚠️ Por favor, ingrese su nombre antes de confirmar el pedido.");
@@ -45,7 +26,7 @@ export default function CarritoPage() {
         nombreCliente,
         total,
         productos: cartItems.map((item) => ({
-          id: item.id_real ?? item.id, // usa id_real si existe
+          id: item.id,
           nombre: item.name,
           cantidad: item.quantity,
           precio: item.price,
@@ -60,7 +41,8 @@ export default function CarritoPage() {
         body: JSON.stringify(pedido),
       });
 
-      if (!res.ok) throw new Error("Error al guardar el pedido en la base de datos");
+      if (!res.ok)
+        throw new Error("Error al guardar el pedido en la base de datos");
 
       clearCart();
       alert(`✅ Pedido registrado correctamente para ${nombreCliente}.`);
@@ -84,9 +66,7 @@ export default function CarritoPage() {
               alt="Carrito vacío"
               className="w-56 h-56 mx-auto opacity-70"
             />
-            <p className="mt-4 text-lg text-gray-600">
-              Su carrito está vacío.
-            </p>
+            <p className="mt-4 text-lg text-gray-600">Su carrito está vacío.</p>
           </div>
         ) : (
           <>

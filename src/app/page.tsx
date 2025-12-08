@@ -54,7 +54,7 @@ export default function Home() {
             descripcion: p.descripcion,
             stock: p.stock,
             price: p.precio,
-            image: p.imagen || "/product-placeholder.png",
+            image: p.imagenUrl || "/product-placeholder.png",
           }))}
         />
       )}

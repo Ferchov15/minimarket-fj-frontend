@@ -3,18 +3,16 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-export default function AdminIndex() {
+export default function AuthGuard({ children }) {
   const router = useRouter();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    if (token) {
-      router.replace("/admin/dashboard");
-    } else {
+    if (!token) {
       router.replace("/admin/login");
     }
   }, []);
 
-  return null;
+  return <>{children}</>;
 }
