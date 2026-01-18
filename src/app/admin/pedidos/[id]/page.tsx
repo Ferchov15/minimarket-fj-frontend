@@ -10,7 +10,7 @@ export default function PedidoDetalleCliente({ params }: any) {
   useEffect(() => {
     const fetchPedido = async () => {
       try {
-        const res = await fetch(`http://localhost:4000/api/pedidos/${id}`);
+        const res = await fetch(`https://minimarket-jk-backend.onrender.com/api/pedidos/${id}`);
         const data = await res.json();
         setPedido(data);
       } catch (error) {
@@ -24,7 +24,9 @@ export default function PedidoDetalleCliente({ params }: any) {
   if (!pedido)
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-200">
-        <div className="text-xl text-gray-700 animate-pulse">Cargando pedido...</div>
+        <div className="text-xl text-gray-700 animate-pulse">
+          Cargando pedido...
+        </div>
       </div>
     );
 
@@ -41,9 +43,13 @@ export default function PedidoDetalleCliente({ params }: any) {
         </div>
 
         {/* DATOS PRINCIPALES */}
-        <div className="bg-gray-50 border border-gray-300 rounded-xl p-5 mb-6">
-          <p className="text-lg"><span className="font-semibold">Cliente:</span> {pedido.nombreCliente}</p>
-          <p className="text-lg mt-1">
+        <div className="bg-gray-50 border border-gray-300 rounded-xl p-5 mb-6 space-y-2">
+          <p className="text-lg">
+            <span className="font-semibold">Cliente:</span>{" "}
+            {pedido.nombreCliente}
+          </p>
+
+          <p className="text-lg">
             <span className="font-semibold">Estado:</span>{" "}
             <span
               className={`px-3 py-1 rounded-full text-white ${
@@ -57,13 +63,31 @@ export default function PedidoDetalleCliente({ params }: any) {
               {pedido.estado}
             </span>
           </p>
-          <p className="text-lg mt-1">
-            <span className="font-semibold">Fecha:</span> {new Date(pedido.fecha).toLocaleString()}
+
+          {/* MÉTODO DE PAGO */}
+          <p className="text-lg">
+            <span className="font-semibold">Método de pago:</span>{" "}
+            <span
+              className={`px-4 py-1 rounded-full font-semibold text-white inline-block ${
+                pedido.metodoPago === "EFECTIVO"
+                  ? "bg-green-600"
+                  : "bg-gradient-to-r from-purple-600 to-pink-500"
+              }`}
+            >
+              {pedido.metodoPago === "EFECTIVO" ? "Efectivo" : "DeUna"}
+            </span>
+          </p>
+
+          <p className="text-lg">
+            <span className="font-semibold">Fecha:</span>{" "}
+            {new Date(pedido.fecha).toLocaleString()}
           </p>
         </div>
 
         {/* TABLA DE PRODUCTOS */}
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Productos</h2>
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+          Productos
+        </h2>
 
         <div className="overflow-hidden rounded-xl shadow-lg mb-6">
           <table className="w-full border-collapse">
@@ -84,7 +108,9 @@ export default function PedidoDetalleCliente({ params }: any) {
                   <tr key={prod.id} className="bg-white border-b text-lg">
                     <td className="p-3 border">{prod.nombre}</td>
                     <td className="p-3 border">${prod.precio}</td>
-                    <td className="p-3 border">{prod.PedidoProducto.cantidad}</td>
+                    <td className="p-3 border">
+                      {prod.PedidoProducto.cantidad}
+                    </td>
                     <td className="p-3 border font-semibold">
                       ${subtotal.toFixed(2)}
                     </td>

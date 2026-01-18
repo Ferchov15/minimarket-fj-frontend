@@ -4,55 +4,74 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+const API_URL = "https://minimarket-jk-backend.onrender.com/api/productos";
+
+const CATEGORIAS = [
+  "Bebidas alcohólica",
+  "Bebidas no alcohólica",
+  "Snacks",
+  "Confitería",
+  "Abarrotes",
+  "Lácteos",
+  "Cárnicos",
+  "Cárnicos congelados",
+  "Verduras",
+  "Productos de aseo",
+  "Papelería",
+  "Productos de aseo de hogar",
+];
+
 export default function ProductosAdminPage() {
   const [productos, setProductos] = useState<any[]>([]);
   const [filtroOrden, setFiltroOrden] = useState("recientes");
   const [filtroCategoria, setFiltroCategoria] = useState("todas");
-  const [categorias, setCategorias] = useState<string[]>([]);
 
   const router = useRouter();
 
+  // 🔹 CARGAR PRODUCTOS
   const cargarProductos = async () => {
-    const res = await fetch("http://localhost:4000/api/productos");
+    const res = await fetch(API_URL);
     const data = await res.json();
     setProductos(data);
-
-    // ✅ EXTRAER CATEGORÍAS ÚNICAS (SIN REPETIR)
-    const categoriasUnicas = [
-      ...new Set(
-        data
-          .map((p: any) => p.categoria)
-          .filter((c: string) => c && c.trim() !== "")
-      ),
-    ];
-
-    setCategorias(categoriasUnicas);
   };
 
   useEffect(() => {
     cargarProductos();
   }, []);
 
-  // ✅ FILTRO REAL COMBINADO
+  // 🔹 FILTROS
   const productosFiltrados = productos
     .slice()
     .sort((a, b) => {
-      if (filtroOrden === "recientes")
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      if (filtroOrden === "recientes") {
+        return (
+          new Date(b.createdAt).getTime() -
+          new Date(a.createdAt).getTime()
+        );
+      }
 
-      if (filtroOrden === "antiguos")
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      if (filtroOrden === "antiguos") {
+        return (
+          new Date(a.createdAt).getTime() -
+          new Date(b.createdAt).getTime()
+        );
+      }
 
       return 0;
     })
-    .filter((p) => (filtroOrden === "bajo-stock" ? p.stock < 10 : true))
     .filter((p) =>
-      filtroCategoria === "todas" ? true : p.categoria === filtroCategoria
+      filtroOrden === "bajo-stock" ? p.stock < 10 : true
+    )
+    .filter((p) =>
+      filtroCategoria === "todas"
+        ? true
+        : p.categoria === filtroCategoria
     );
 
   return (
     <div className="min-h-screen bg-gray-100 p-10">
       <div className="max-w-6xl mx-auto bg-white p-8 rounded-2xl shadow-xl">
+
         <h1 className="text-4xl font-bold mb-6 text-center">
           Administración de Productos
         </h1>
@@ -67,7 +86,7 @@ export default function ProductosAdminPage() {
           </Link>
 
           <div className="flex gap-4">
-            {/* ✅ FILTRO DE ORDEN */}
+            {/* ORDEN */}
             <select
               value={filtroOrden}
               onChange={(e) => setFiltroOrden(e.target.value)}
@@ -78,7 +97,7 @@ export default function ProductosAdminPage() {
               <option value="bajo-stock">Stock &lt; 10</option>
             </select>
 
-            {/* ✅ FILTRO DE CATEGORÍAS DINÁMICAS */}
+            {/* CATEGORÍAS FIJAS */}
             <select
               value={filtroCategoria}
               onChange={(e) => setFiltroCategoria(e.target.value)}
@@ -86,7 +105,7 @@ export default function ProductosAdminPage() {
             >
               <option value="todas">Todas las categorías</option>
 
-              {categorias.map((cat) => (
+              {CATEGORIAS.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
                 </option>
@@ -143,10 +162,9 @@ export default function ProductosAdminPage() {
                       onClick={async () => {
                         if (!confirm("¿Eliminar producto?")) return;
 
-                        await fetch(
-                          `http://localhost:4000/api/productos/${p.id}`,
-                          { method: "DELETE" }
-                        );
+                        await fetch(`${API_URL}/${p.id}`, {
+                          method: "DELETE",
+                        });
 
                         cargarProductos();
                       }}
@@ -159,10 +177,7 @@ export default function ProductosAdminPage() {
 
               {productosFiltrados.length === 0 && (
                 <tr>
-                  <td
-                    colSpan={6}
-                    className="text-center p-6 text-gray-500"
-                  >
+                  <td colSpan={6} className="text-center p-6 text-gray-500">
                     No hay productos con estos filtros
                   </td>
                 </tr>
@@ -171,7 +186,7 @@ export default function ProductosAdminPage() {
           </table>
         </div>
 
-        {/* BOTÓN VOLVER */}
+        {/* VOLVER */}
         <button
           type="button"
           onClick={() => router.push("/admin/dashboard")}
@@ -179,6 +194,7 @@ export default function ProductosAdminPage() {
         >
           Volver al Panel Principal
         </button>
+
       </div>
     </div>
   );

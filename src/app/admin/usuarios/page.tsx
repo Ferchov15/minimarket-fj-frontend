@@ -15,7 +15,7 @@ export default function UsuariosAdminPage() {
 
   const traerUsuarios = async () => {
     try {
-      const res = await fetch("http://localhost:4000/api/usuarios/listar");
+      const res = await fetch("https://minimarket-jk-backend.onrender.com/api/usuarios/listar");
       const data = await res.json();
       setUsuarios(data);
     } catch (error) {
@@ -29,7 +29,7 @@ export default function UsuariosAdminPage() {
     if (!confirm("¿Seguro deseas eliminar este usuario?")) return;
 
     try {
-      const res = await fetch(`http://localhost:4000/api/usuarios/${id}`, {
+      const res = await fetch(`https://minimarket-jk-backend.onrender.com/api/usuarios/${id}`, {
         method: "DELETE",
       });
 

@@ -9,7 +9,7 @@ export default function PedidosCancelados() {
 
     const fetchPedidos = async () => {
         try {
-            const res = await fetch("http://localhost:4000/api/pedidos");
+            const res = await fetch("https://minimarket-jk-backend.onrender.com/api/pedidos");
             if (!res.ok) throw new Error("Error al obtener pedidos");
 
             const data = await res.json();

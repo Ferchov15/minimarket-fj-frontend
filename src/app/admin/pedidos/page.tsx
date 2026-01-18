@@ -10,7 +10,7 @@ export default function AdminPedidos() {
     // Obtener pedidos con estado "En proceso"
     const fetchPedidos = async () => {
         try {
-            const res = await fetch("http://localhost:4000/api/pedidos");
+            const res = await fetch("https://minimarket-jk-backend.onrender.com/api/pedidos");
             if (!res.ok) throw new Error("No se pudo obtener los pedidos");
             const data = await res.json();
 
@@ -29,7 +29,7 @@ export default function AdminPedidos() {
     // Cambiar estado del pedido
     const actualizarEstado = async (id: string, nuevoEstado: string) => {
         try {
-            const res = await fetch(`http://localhost:4000/api/pedidos/${id}`, {
+            const res = await fetch(`https://minimarket-jk-backend.onrender.com/api/pedidos/${id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ estado: nuevoEstado }),
@@ -120,7 +120,7 @@ export default function AdminPedidos() {
                     </Link>
 
                     <Link
-                        href="/admin"
+                        href="/admin/dashboard"
                         className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md shadow text-center"
                     >
                         Volver al inicio

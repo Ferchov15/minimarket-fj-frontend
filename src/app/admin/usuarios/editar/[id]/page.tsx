@@ -15,7 +15,7 @@ export default function EditarUsuarioPage() {
 
   useEffect(() => {
     const cargarUsuario = async () => {
-      const res = await fetch(`http://localhost:4000/api/usuarios/${id}`);
+      const res = await fetch(`https://minimarket-jk-backend.onrender.com/api/usuarios/${id}`);
       const data = await res.json();
       setForm({ nombre: data.nombre, correo: data.correo, contraseña: "" });
     };
@@ -29,8 +29,7 @@ export default function EditarUsuarioPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // enviamos el objeto TAL CUAL el backend lo espera
-    const res = await fetch(`http://localhost:4000/api/usuarios/${id}`, {
+    const res = await fetch(`https://minimarket-jk-backend.onrender.com/api/usuarios/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),

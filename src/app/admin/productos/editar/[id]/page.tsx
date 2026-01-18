@@ -3,18 +3,33 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 
-const API_URL = "http://localhost:4000/api/productos";
+const API_URL = "https://minimarket-jk-backend.onrender.com/api/productos";
 
 export default function EditarProducto() {
     const { id } = useParams();
     const router = useRouter();
+
+    const CATEGORIAS = [
+        "Bebidas alcohólica",
+        "Bebidas no alcohólica",
+        "Snacks",
+        "Confitería",
+        "Abarrotes",
+        "Lácteos",
+        "Cárnicos",
+        "Cárnicos congelados",
+        "Verduras",
+        "Productos de aseo",
+        "Papelería",
+        "Productos de aseo de hogar",
+    ];
 
     const [form, setForm] = useState({
         nombre: "",
         precio: "",
         descripcion: "",
         stock: "",
-        descuento: "",
+        categoria: "",
         imagenActual: "",
     });
 
@@ -31,15 +46,16 @@ export default function EditarProducto() {
                 precio: data.precio,
                 descripcion: data.descripcion ?? "",
                 stock: data.stock,
-                descuento: data.descuento ?? 0,
+                categoria: data.categoria ?? "",
                 imagenActual: data.imagenUrl || "",
             });
         };
 
-        getProduct();
+        if (id) getProduct();
     }, [id]);
 
-    const handleImage = (file: File) => {
+    const handleImage = (file: File | null) => {
+        if (!file) return;
         setNuevaImagen(file);
         setPreview(URL.createObjectURL(file));
     };
@@ -52,9 +68,11 @@ export default function EditarProducto() {
         formData.append("precio", form.precio);
         formData.append("descripcion", form.descripcion);
         formData.append("stock", form.stock);
-        formData.append("descuento", form.descuento); // ← NUEVO
+        formData.append("categoria", form.categoria);
 
-        if (nuevaImagen) formData.append("imagen", nuevaImagen);
+        if (nuevaImagen) {
+            formData.append("imagen", nuevaImagen);
+        }
 
         const res = await fetch(`${API_URL}/${id}`, {
             method: "PUT",
@@ -62,10 +80,10 @@ export default function EditarProducto() {
         });
 
         if (res.ok) {
-            alert("Producto actualizado correctamente");
+            alert("✅ Producto actualizado correctamente");
             router.push("/admin/productos");
         } else {
-            alert("Error al actualizar el producto");
+            alert("❌ Error al actualizar el producto");
         }
     };
 
@@ -85,51 +103,74 @@ export default function EditarProducto() {
                         <input
                             type="text"
                             value={form.nombre}
-                            onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+                            onChange={(e) =>
+                                setForm({ ...form, nombre: e.target.value })
+                            }
                             className="w-full p-3 border rounded-lg"
+                            required
                         />
                     </div>
 
                     {/* Precio */}
                     <div>
-                        <label className="block text-lg font-semibold mb-1">Precio ($)</label>
+                        <label className="block text-lg font-semibold mb-1">
+                            Precio ($)
+                        </label>
                         <input
                             type="number"
+                            step="0.01"
                             value={form.precio}
-                            onChange={(e) => setForm({ ...form, precio: e.target.value })}
+                            onChange={(e) =>
+                                setForm({ ...form, precio: e.target.value })
+                            }
                             className="w-full p-3 border rounded-lg"
+                            required
                         />
                     </div>
 
                     {/* Stock */}
                     <div>
-                        <label className="block text-lg font-semibold mb-1">Stock</label>
+                        <label className="block text-lg font-semibold mb-1">
+                            Stock
+                        </label>
                         <input
                             type="number"
                             value={form.stock}
-                            onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                            onChange={(e) =>
+                                setForm({ ...form, stock: e.target.value })
+                            }
                             className="w-full p-3 border rounded-lg"
+                            required
                         />
                     </div>
 
-                    {/* Descuento */}
+                    {/* Categoría */}
                     <div>
-                        <label className="block text-lg font-semibold mb-1">Descuento (%)</label>
-                        <input
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={form.descuento}
+                        <label className="block text-lg font-semibold mb-1">
+                            Categoría
+                        </label>
+                        <select
+                            value={form.categoria}
                             onChange={(e) =>
-                                setForm({ ...form, descuento: e.target.value })
+                                setForm({ ...form, categoria: e.target.value })
                             }
                             className="w-full p-3 border rounded-lg"
-                        />
+                            required
+                        >
+                            <option value="">Seleccione una categoría</option>
+                            {CATEGORIAS.map((cat) => (
+                                <option key={cat} value={cat}>
+                                    {cat}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     {/* Descripción */}
                     <div>
-                        <label className="block text-lg font-semibold mb-1">Descripción</label>
+                        <label className="block text-lg font-semibold mb-1">
+                            Descripción
+                        </label>
                         <textarea
                             value={form.descripcion}
                             onChange={(e) =>
@@ -142,18 +183,19 @@ export default function EditarProducto() {
                     {/* Imagen */}
                     <div>
                         <label className="block text-lg font-semibold mb-3">
-                            Imagen del producto (si no desea cambiar, ignore este campo)
+                            Imagen del producto (opcional)
                         </label>
 
                         <div
                             className="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer bg-gray-50 hover:bg-gray-100 transition"
                             onDrop={(e) => {
                                 e.preventDefault();
-                                const file = e.dataTransfer.files[0];
-                                if (file) handleImage(file);
+                                handleImage(e.dataTransfer.files[0]);
                             }}
                             onDragOver={(e) => e.preventDefault()}
-                            onClick={() => document.getElementById("fileInput")?.click()}
+                            onClick={() =>
+                                document.getElementById("fileInput")?.click()
+                            }
                         >
                             {preview ? (
                                 <img
@@ -166,7 +208,9 @@ export default function EditarProducto() {
                                     className="w-40 h-40 object-cover mx-auto rounded-lg shadow"
                                 />
                             ) : (
-                                <p className="text-gray-600">Arrastra una imagen aquí o haz clic</p>
+                                <p className="text-gray-600">
+                                    Arrastra una imagen aquí o haz clic
+                                </p>
                             )}
 
                             <input
@@ -174,7 +218,9 @@ export default function EditarProducto() {
                                 id="fileInput"
                                 className="hidden"
                                 accept="image/*"
-                                onChange={(e) => handleImage(e.target.files?.[0] || null)}
+                                onChange={(e) =>
+                                    handleImage(e.target.files?.[0] || null)
+                                }
                             />
                         </div>
                     </div>

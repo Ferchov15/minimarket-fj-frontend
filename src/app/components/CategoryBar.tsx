@@ -1,39 +1,133 @@
 "use client";
+import { useState } from "react";
 
-export default function CategoryBar() {
-  const categories = ['Lácteos', 'Bebidas', 'Comidas Chatarra'];
+/* ---------- PROPS ---------- */
+interface CategoryBarProps {
+  categoriaActiva?: string;
+  onSelect?: (categoria: string) => void;
+}
+
+/* ---------- CATEGORÍAS FIJAS ---------- */
+const CATEGORIAS = [
+  "Abarrotes",
+  "Bebidas alcohólicas",
+  "Bebidas no alcohólicas",
+  "Snacks",
+  "Confitería",
+  "Lácteos",
+  "Cárnicos",
+  "Cárnicos congelados",
+  "Verduras",
+  "Productos de aseo",
+  "Papelería",
+  "Productos de aseo del hogar",
+];
+
+/* ---------- COMPONENTE ---------- */
+export default function CategoryBar({
+  categoriaActiva = "todas",
+  onSelect,
+}: CategoryBarProps) {
+  const VISIBLE = 4;
+  const [start, setStart] = useState(0);
+
+  const handleSelect = (cat: string) => {
+    if (typeof onSelect === "function") onSelect(cat);
+  };
+
+  const maxIndex = Math.max(CATEGORIAS.length - VISIBLE, 0);
+  const visibles = CATEGORIAS.slice(start, start + VISIBLE);
 
   return (
-    <div
-      style={{
-        backgroundColor: '#b36a5e',
-        display: 'flex',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        padding: '0.6rem 0',
-        borderRadius: '0 0 50px 50px',
-        marginBottom: '1rem'
-      }}
-    >
-      {categories.map((cat, i) => (
+    <div style={containerStyle}>
+      {CATEGORIAS.length > VISIBLE && (
         <button
-          key={i}
-          style={{
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: 'white',
-            fontWeight: 'bold',
-            fontSize: '1.1rem',
-            cursor: 'pointer',
-            borderBottom: '3px solid transparent',
-            transition: '0.3s'
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.borderBottom = '3px solid blue')}
-          onMouseLeave={(e) => (e.currentTarget.style.borderBottom = '3px solid transparent')}
+          onClick={() => setStart((p) => Math.max(p - 1, 0))}
+          style={arrowStyle}
         >
-          {cat}
+          ‹
         </button>
+      )}
+
+      {/* TODAS */}
+      <button
+        onClick={() => handleSelect("todas")}
+        style={buttonStyle(categoriaActiva === "todas")}
+      >
+        Todas
+      </button>
+
+      {visibles.map((cat) => (
+        <div key={cat} style={itemWrapper}>
+          <div style={lineSeparator} />
+
+          <button
+            onClick={() => handleSelect(cat)}
+            style={buttonStyle(categoriaActiva === cat)}
+          >
+            {cat}
+          </button>
+        </div>
       ))}
+
+      {CATEGORIAS.length > VISIBLE && (
+        <button
+          onClick={() => setStart((p) => Math.min(p + 1, maxIndex))}
+          style={arrowStyle}
+        >
+          ›
+        </button>
+      )}
     </div>
   );
 }
+
+/* ---------- ESTILOS ---------- */
+const containerStyle: React.CSSProperties = {
+  backgroundColor: "#b36a5e",
+  display: "flex",
+  alignItems: "center",
+  gap: "1rem",
+  padding: "0.8rem 1.2rem",
+  borderRadius: "0 0 40px 40px",
+  marginBottom: "1.2rem",
+  justifyContent: "center",
+};
+
+const buttonStyle = (activo: boolean): React.CSSProperties => ({
+  background: "transparent",
+  border: "none",
+  color: "white",
+  fontWeight: "bold",
+  fontSize: "1.2rem",
+  cursor: "pointer",
+  paddingBottom: "6px",
+  borderBottom: activo
+    ? "3px solid #4fc3f7"
+    : "3px solid transparent",
+  whiteSpace: "nowrap",
+});
+
+const arrowStyle: React.CSSProperties = {
+  background: "rgba(255,255,255,0.15)",
+  border: "none",
+  borderRadius: "50%",
+  color: "white",
+  fontSize: "1.6rem",
+  cursor: "pointer",
+  width: "36px",
+  height: "36px",
+};
+
+const itemWrapper: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "0.6rem",
+};
+
+const lineSeparator: React.CSSProperties = {
+  width: "1px",
+  height: "24px",
+  backgroundColor: "rgba(255,255,255,0.5)",
+  margin: "0 0.6rem",
+};

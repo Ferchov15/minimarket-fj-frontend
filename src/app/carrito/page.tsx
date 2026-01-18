@@ -4,51 +4,55 @@ import Navbar from "../components/Navbar";
 import { useCart } from "../../context/CartContext";
 import Link from "next/link";
 import { useState } from "react";
+import PaymentModal from "../components/PaymentModal";
+import DeUnaQRModal from "../components/DeUnaQRModal";
 
 export default function CarritoPage() {
   const { cartItems, removeFromCart, clearCart } = useCart();
   const [nombreCliente, setNombreCliente] = useState("");
 
-  // Calcular total correctamente
+  // 🔹 control de modales
+  const [mostrarPago, setMostrarPago] = useState(false);
+  const [mostrarQR, setMostrarQR] = useState(false);
+
+  // Calcular total
   const total = Array.isArray(cartItems)
     ? cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
     : 0;
 
-  // Confirmar pedido
-  const handleConfirmar = async () => {
+  // 🧠 Guardar pedido (EFECTIVO / DEUNA)
+  const guardarPedido = async (metodoPago: "EFECTIVO" | "DEUNA") => {
     if (!nombreCliente.trim()) {
-      alert("⚠️ Por favor, ingrese su nombre antes de confirmar el pedido.");
+      alert("⚠️ Ingrese su nombre antes de continuar");
       return;
     }
 
     try {
       const pedido = {
         nombreCliente,
-        total,
+        metodoPago,
         productos: cartItems.map((item) => ({
           id: item.id,
-          nombre: item.name,
           cantidad: item.quantity,
-          precio: item.price,
         })),
       };
 
-      console.log("📦 Enviando pedido al backend:", pedido);
-
-      const res = await fetch("http://localhost:4000/api/pedidos", {
+      const res = await fetch("https://minimarket-jk-backend.onrender.com/api/pedidos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(pedido),
       });
 
-      if (!res.ok)
-        throw new Error("Error al guardar el pedido en la base de datos");
+      if (!res.ok) throw new Error("Error al guardar pedido");
 
       clearCart();
-      alert(`✅ Pedido registrado correctamente para ${nombreCliente}.`);
+      setMostrarPago(false);
+      setMostrarQR(false);
+
+      alert(`✅ Pedido registrado correctamente (${metodoPago})`);
     } catch (error) {
       console.error(error);
-      alert("❌ No se pudo guardar el pedido. Intente nuevamente.");
+      alert("❌ No se pudo registrar el pedido");
     }
   };
 
@@ -57,7 +61,9 @@ export default function CarritoPage() {
       <Navbar />
 
       <main className="flex flex-col items-center p-6">
-        <h1 className="text-xl font-semibold mb-4">Su carrito de compra:</h1>
+        <h1 className="text-xl font-semibold mb-4">
+          Su carrito de compra:
+        </h1>
 
         {cartItems.length === 0 ? (
           <div className="text-center mt-10">
@@ -66,11 +72,15 @@ export default function CarritoPage() {
               alt="Carrito vacío"
               className="w-56 h-56 mx-auto opacity-70"
             />
-            <p className="mt-4 text-lg text-gray-600">Su carrito está vacío.</p>
+            <p className="mt-4 text-lg text-gray-600">
+              Su carrito está vacío.
+            </p>
           </div>
         ) : (
           <>
+            {/* 👇 MISMA DISTRIBUCIÓN ORIGINAL */}
             <div className="flex flex-col md:flex-row items-center md:items-start gap-10">
+              {/* 🛒 IMAGEN IZQUIERDA */}
               <div className="text-center">
                 <img
                   src="https://cdn-icons-png.flaticon.com/512/107/107831.png"
@@ -79,6 +89,7 @@ export default function CarritoPage() {
                 />
               </div>
 
+              {/* 📋 TABLA DERECHA */}
               <table className="border border-gray-400 text-center">
                 <thead>
                   <tr className="bg-purple-300">
@@ -110,6 +121,7 @@ export default function CarritoPage() {
               </table>
             </div>
 
+            {/* 🔽 PARTE INFERIOR (IGUAL QUE ANTES) */}
             <div className="mt-6 flex flex-col md:flex-row items-center gap-4">
               <h2 className="text-lg font-bold">
                 Total: ${total.toFixed(2)}
@@ -132,8 +144,8 @@ export default function CarritoPage() {
                 </Link>
 
                 <button
+                  onClick={() => setMostrarPago(true)}
                   className="bg-indigo-700 hover:bg-indigo-800 text-white font-semibold px-6 py-2 rounded-md"
-                  onClick={handleConfirmar}
                 >
                   Confirmar
                 </button>
@@ -142,6 +154,27 @@ export default function CarritoPage() {
           </>
         )}
       </main>
+
+      {/* 🧾 MODAL MÉTODO DE PAGO */}
+      <PaymentModal
+        visible={mostrarPago}
+        onClose={() => setMostrarPago(false)}
+        onSelectMetodo={(metodo) => {
+          if (metodo === "EFECTIVO") {
+            guardarPedido("EFECTIVO");
+          } else {
+            setMostrarPago(false);
+            setMostrarQR(true);
+          }
+        }}
+      />
+
+      {/* 📱 MODAL QR DEUNA */}
+      <DeUnaQRModal
+        visible={mostrarQR}
+        onClose={() => setMostrarQR(false)}
+        onConfirm={() => guardarPedido("DEUNA")}
+      />
     </div>
   );
 }

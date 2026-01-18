@@ -11,7 +11,6 @@ export default function CrearProductoPage() {
         descripcion: "",
         precio: "",
         stock: "",
-        descuento: "",
         categoria: "",
     });
 
@@ -22,11 +21,27 @@ export default function CrearProductoPage() {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    // 📌 Cuando arrastren o seleccionen imagen
+    //  Cuando arrastren o seleccionen imagen
     const handleImage = (file) => {
         setImagen(file);
         setPreview(URL.createObjectURL(file));
     };
+
+    //Lista de las categorias de los productos
+    const CATEGORIAS = [
+        "Bebidas alcohólica",
+        "Bebidas no alcohólica",
+        "Snacks",
+        "Confitería",
+        "Abarrotes",
+        "Lacteos",
+        "Cárnicos",
+        "Cárnicos congelados",
+        "Verduras",
+        "Productos de aseo",
+        "Papelería",
+        "Productos de aseo de hogar"
+    ];
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -39,7 +54,7 @@ export default function CrearProductoPage() {
 
         if (imagen) data.append("imagen", imagen);
 
-        const res = await fetch("http://localhost:4000/api/productos", {
+        const res = await fetch("https://minimarket-jk-backend.onrender.com/api/productos", {
             method: "POST",
             body: data,
         });
@@ -96,23 +111,22 @@ export default function CrearProductoPage() {
                         required
                     />
 
-                    <input
-                        name="descuento"
-                        type="number"
-                        step="0.01"
-                        placeholder="Descuento (%)"
-                        className="border p-3 rounded-lg"
-                        onChange={handleChange}
-                    />
-
-                    <input
+                    <select
                         name="categoria"
-                        placeholder="Categoría"
                         className="border p-3 rounded-lg"
+                        value={form.categoria}
                         onChange={handleChange}
-                    />
+                        required
+                    >
+                        <option value="">Seleccione una categoría</option>
+                        {CATEGORIAS.map((cat) => (
+                            <option key={cat} value={cat}>
+                                {cat}
+                            </option>
+                        ))}
+                    </select>
 
-                    {/* 📌 Dropzone */}
+
                     <div
                         className="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer bg-gray-50 hover:bg-gray-100"
                         onClick={() => document.getElementById("fileInput").click()}

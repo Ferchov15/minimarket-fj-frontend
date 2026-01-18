@@ -12,11 +12,12 @@ export default function ProductGrid({ products }: { products: Product[] }) {
   return (
     <div
       style={{
-        display: 'flex',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
         gap: '1.5rem',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
-        padding: '1rem'
+        padding: '1rem',
+        maxWidth: '1200px',
+        margin: '0 auto'
       }}
     >
       {products.map((p, i) => (

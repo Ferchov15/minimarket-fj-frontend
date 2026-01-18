@@ -14,13 +14,18 @@ export default function LogoutButton() {
   return (
     <button 
       onClick={logout} 
-      style={{
-        background: "red",
-        padding: "10px",
-        color: "white",
-        borderRadius: "5px",
-        marginTop: "10px"
-      }}
+      className="
+        bg-red-600
+        hover:bg-red-800
+        text-white
+        py-4
+        px-14
+        rounded-xl
+        text-2xl
+        font-semibold
+        transition
+        shadow-xl
+      "
     >
       Cerrar Sesión
     </button>
