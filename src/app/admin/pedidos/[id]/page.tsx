@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 
 export default function PedidoDetalleCliente() {
   const params = useParams();
-  const id = params.id as string; // ✅ ESTE ES EL FIX REAL
+  const id = params.id as string; 
 
   const [pedido, setPedido] = useState<any>(null);
 
@@ -89,29 +89,22 @@ export default function PedidoDetalleCliente() {
 
         <h2 className="text-2xl font-semibold mb-4">Productos</h2>
 
-        <table className="w-full border">
-          <thead className="bg-blue-600 text-white">
-            <tr>
-              <th className="p-2">Producto</th>
-              <th className="p-2">Precio</th>
-              <th className="p-2">Cantidad</th>
-              <th className="p-2">Subtotal</th>
+        <table className="w-full border rounded-lg overflow-hidden">
+          <thead>
+            <tr className="bg-amber-600 text-white">
+              <th className="border px-4 py-2">Producto</th>
+              <th className="border px-4 py-2">Cantidad</th>
+              <th className="border px-4 py-2">Precio</th>
             </tr>
           </thead>
           <tbody>
-            {pedido.productos.map((prod: any) => {
-              const subtotal =
-                prod.PedidoProducto.cantidad * parseFloat(prod.precio);
-
-              return (
-                <tr key={prod.id} className="text-center border-b">
-                  <td>{prod.nombre}</td>
-                  <td>${prod.precio}</td>
-                  <td>{prod.PedidoProducto.cantidad}</td>
-                  <td>${subtotal.toFixed(2)}</td>
-                </tr>
-              );
-            })}
+            {pedido.productos.map((prod: any, index: number) => (
+              <tr key={index} className="text-center">
+                <td className="border px-4 py-2">{prod.nombre}</td>
+                <td className="border px-4 py-2">{prod.PedidoProducto.cantidad}</td>
+                <td className="border px-4 py-2">${prod.precio}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
 
