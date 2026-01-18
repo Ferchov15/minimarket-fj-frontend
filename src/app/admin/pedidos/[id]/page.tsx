@@ -60,10 +60,10 @@ export default function PedidoDetalleCliente() {
             <b>Estado:</b>{" "}
             <span
               className={`px-3 py-1 rounded-full text-white ${pedido.estado === "Completado"
-                  ? "bg-green-600"
-                  : pedido.estado === "Cancelado"
-                    ? "bg-red-600"
-                    : "bg-yellow-600"
+                ? "bg-green-600"
+                : pedido.estado === "Cancelado"
+                  ? "bg-red-600"
+                  : "bg-yellow-600"
                 }`}
             >
               {pedido.estado}
@@ -74,8 +74,8 @@ export default function PedidoDetalleCliente() {
             <b>Método de pago:</b>{" "}
             <span
               className={`px-4 py-1 rounded-full text-white ${pedido.metodoPago === "EFECTIVO"
-                  ? "bg-green-600"
-                  : "bg-purple-600"
+                ? "bg-green-600"
+                : "bg-purple-600"
                 }`}
             >
               {pedido.metodoPago}
@@ -87,7 +87,7 @@ export default function PedidoDetalleCliente() {
 
         <h2 className="text-2xl font-semibold mb-4">Productos</h2>
 
-        <table className="w-full border rounded-lg overflow-hidden">
+        <table className="w-full border-2 border-black rounded-lg overflow-hidden">
           <thead>
             <tr className="bg-blue-600 text-white">
               <th className="border border-black px-4 py-2">Producto</th>
