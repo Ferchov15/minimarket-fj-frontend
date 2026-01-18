@@ -2,20 +2,18 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  if (process.env.NODE_ENV === "development") {
-    return NextResponse.next();
-  }
-
   const { pathname } = request.nextUrl;
 
   if (pathname === "/admin/login") {
     return NextResponse.next();
   }
 
-  if (pathname.startsWith("/admin")) {
-    const token = request.cookies.get("token")?.value;
+  const isAdminRoute = pathname.startsWith("/admin");
 
-    if (!token) {
+  if (isAdminRoute) {
+    const isAuth = request.cookies.get("admin_auth");
+
+    if (!isAuth) {
       return NextResponse.redirect(
         new URL("/admin/login", request.url)
       );
