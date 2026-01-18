@@ -3,28 +3,33 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
+import { useParams } from "next/navigation";
 
-export default function PedidoDetalle({ params }: any) {
-  const { id } = params;
+export default function PedidoDetalle() {
+  const { id } = useParams(); // ✅ AQUÍ ESTÁ LA CLAVE
 
   const [pedido, setPedido] = useState<any>(null);
 
   const fetchPedido = async () => {
+    if (!id) return;
+
     try {
       const res = await fetch(
         `https://minimarket-jk-backend.onrender.com/api/pedidos/${id}`
       );
+
       if (!res.ok) throw new Error("Error al obtener el pedido");
+
       const data = await res.json();
       setPedido(data);
     } catch (error) {
-      console.error(error);
+      console.error("ERROR:", error);
     }
   };
 
   useEffect(() => {
     fetchPedido();
-  }, []);
+  }, [id]);
 
   if (!pedido) {
     return (
@@ -49,54 +54,19 @@ export default function PedidoDetalle({ params }: any) {
           🧾 Detalle del Pedido
         </h1>
 
-        {/* Info principal */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-
           <div className="border rounded-lg p-4">
-            <p className="text-lg">
-              <strong>Cliente:</strong> {pedido.nombreCliente}
-            </p>
-            <p className="text-lg">
-              <strong>Estado:</strong> {pedido.estado}
-            </p>
-            <p className="text-lg">
-              <strong>Total:</strong> ${pedido.total}
-            </p>
+            <p className="text-lg"><strong>Cliente:</strong> {pedido.nombreCliente}</p>
+            <p className="text-lg"><strong>Estado:</strong> {pedido.estado}</p>
+            <p className="text-lg"><strong>Total:</strong> ${pedido.total}</p>
           </div>
 
           <div className="border rounded-lg p-4 flex flex-col items-center justify-center">
             <p className="text-lg font-semibold mb-3">Método de pago</p>
-
-            <span
-              className={`${metodoColor} text-white px-6 py-2 rounded-full text-lg font-bold shadow`}
-            >
+            <span className={`${metodoColor} text-white px-6 py-2 rounded-full font-bold`}>
               {pedido.metodoPago || "No asignado"}
             </span>
           </div>
-        </div>
-
-        {/* Productos */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-4">🛒 Productos</h2>
-
-          <table className="w-full border rounded-lg overflow-hidden">
-            <thead>
-              <tr className="bg-amber-600 text-white">
-                <th className="border px-4 py-2">Producto</th>
-                <th className="border px-4 py-2">Cantidad</th>
-                <th className="border px-4 py-2">Precio</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pedido.productos.map((prod: any, index: number) => (
-                <tr key={index} className="text-center">
-                  <td className="border px-4 py-2">{prod.nombre}</td>
-                  <td className="border px-4 py-2">{prod.cantidad}</td>
-                  <td className="border px-4 py-2">${prod.precio}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
 
         <div className="flex justify-center mt-8">
