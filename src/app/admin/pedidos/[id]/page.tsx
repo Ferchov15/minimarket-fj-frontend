@@ -87,7 +87,7 @@ export default function PedidoDetalleCliente() {
 
         <h2 className="text-2xl font-semibold mb-4">Productos</h2>
 
-        <table className="w-full border-2 border-black rounded-lg overflow-hidden">
+        <table className="w-full border-2 border-black rounded-lg">
           <thead>
             <tr className="bg-blue-600 text-white">
               <th className="border border-black px-4 py-2">Producto</th>
