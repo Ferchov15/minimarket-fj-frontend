@@ -1,16 +1,26 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FaReceipt, FaArrowLeft } from "react-icons/fa";
 
-export default function PedidoDetalleCliente({ params }: any) {
-  const { id } = React.use(params);
+interface PageProps {
+  params: {
+    id: string;
+  };
+}
+
+export default function PedidoDetalleCliente({ params }: PageProps) {
+  const { id } = params;
   const [pedido, setPedido] = useState<any>(null);
 
   useEffect(() => {
     const fetchPedido = async () => {
       try {
-        const res = await fetch(`https://minimarket-jk-backend.onrender.com/api/pedidos/${id}`);
+        const res = await fetch(
+          `https://minimarket-jk-backend.onrender.com/api/pedidos/${id}`,
+          { credentials: "include" }
+        );
+
         const data = await res.json();
         setPedido(data);
       } catch (error) {
@@ -21,7 +31,7 @@ export default function PedidoDetalleCliente({ params }: any) {
     fetchPedido();
   }, [id]);
 
-  if (!pedido)
+  if (!pedido) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-200">
         <div className="text-xl text-gray-700 animate-pulse">
@@ -29,12 +39,12 @@ export default function PedidoDetalleCliente({ params }: any) {
         </div>
       </div>
     );
+  }
 
   return (
     <div className="min-h-screen bg-gray-200 p-6 flex justify-center">
       <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-8">
 
-        {/* TÍTULO */}
         <div className="flex items-center gap-3 mb-6">
           <FaReceipt size={32} className="text-blue-600" />
           <h1 className="text-3xl font-bold text-gray-800">
@@ -42,101 +52,74 @@ export default function PedidoDetalleCliente({ params }: any) {
           </h1>
         </div>
 
-        {/* DATOS PRINCIPALES */}
-        <div className="bg-gray-50 border border-gray-300 rounded-xl p-5 mb-6 space-y-2">
-          <p className="text-lg">
-            <span className="font-semibold">Cliente:</span>{" "}
-            {pedido.nombreCliente}
-          </p>
+        <div className="bg-gray-50 border rounded-xl p-5 mb-6 space-y-2">
+          <p><b>Cliente:</b> {pedido.nombreCliente}</p>
 
-          <p className="text-lg">
-            <span className="font-semibold">Estado:</span>{" "}
-            <span
-              className={`px-3 py-1 rounded-full text-white ${
-                pedido.estado === "Completado"
-                  ? "bg-green-600"
-                  : pedido.estado === "Cancelado"
-                  ? "bg-red-600"
-                  : "bg-yellow-600"
-              }`}
-            >
+          <p>
+            <b>Estado:</b>{" "}
+            <span className={`px-3 py-1 rounded-full text-white ${
+              pedido.estado === "Completado"
+                ? "bg-green-600"
+                : pedido.estado === "Cancelado"
+                ? "bg-red-600"
+                : "bg-yellow-600"
+            }`}>
               {pedido.estado}
             </span>
           </p>
 
-          {/* MÉTODO DE PAGO */}
-          <p className="text-lg">
-            <span className="font-semibold">Método de pago:</span>{" "}
-            <span
-              className={`px-4 py-1 rounded-full font-semibold text-white inline-block ${
-                pedido.metodoPago === "EFECTIVO"
-                  ? "bg-green-600"
-                  : "bg-gradient-to-r from-purple-600 to-pink-500"
-              }`}
-            >
-              {pedido.metodoPago === "EFECTIVO" ? "Efectivo" : "DeUna"}
+          <p>
+            <b>Método de pago:</b>{" "}
+            <span className={`px-4 py-1 rounded-full text-white ${
+              pedido.metodoPago === "EFECTIVO"
+                ? "bg-green-600"
+                : "bg-purple-600"
+            }`}>
+              {pedido.metodoPago}
             </span>
           </p>
 
-          <p className="text-lg">
-            <span className="font-semibold">Fecha:</span>{" "}
-            {new Date(pedido.fecha).toLocaleString()}
-          </p>
+          <p><b>Fecha:</b> {new Date(pedido.fecha).toLocaleString()}</p>
         </div>
 
-        {/* TABLA DE PRODUCTOS */}
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-          Productos
-        </h2>
+        <h2 className="text-2xl font-semibold mb-4">Productos</h2>
 
-        <div className="overflow-hidden rounded-xl shadow-lg mb-6">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-blue-600 text-white text-lg">
-                <th className="p-3 border">Producto</th>
-                <th className="p-3 border">Precio</th>
-                <th className="p-3 border">Cantidad</th>
-                <th className="p-3 border">Subtotal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pedido.productos.map((prod: any) => {
-                const subtotal =
-                  prod.PedidoProducto.cantidad * parseFloat(prod.precio);
+        <table className="w-full border">
+          <thead className="bg-blue-600 text-white">
+            <tr>
+              <th className="p-2">Producto</th>
+              <th className="p-2">Precio</th>
+              <th className="p-2">Cantidad</th>
+              <th className="p-2">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pedido.productos.map((prod: any) => {
+              const subtotal =
+                prod.PedidoProducto.cantidad * parseFloat(prod.precio);
 
-                return (
-                  <tr key={prod.id} className="bg-white border-b text-lg">
-                    <td className="p-3 border">{prod.nombre}</td>
-                    <td className="p-3 border">${prod.precio}</td>
-                    <td className="p-3 border">
-                      {prod.PedidoProducto.cantidad}
-                    </td>
-                    <td className="p-3 border font-semibold">
-                      ${subtotal.toFixed(2)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+              return (
+                <tr key={prod.id} className="text-center border-b">
+                  <td>{prod.nombre}</td>
+                  <td>${prod.precio}</td>
+                  <td>{prod.PedidoProducto.cantidad}</td>
+                  <td>${subtotal.toFixed(2)}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+
+        <div className="flex justify-end mt-6 text-xl font-bold">
+          Total: ${pedido.total}
         </div>
 
-        {/* TOTAL */}
-        <div className="flex justify-end">
-          <div className="bg-blue-600 text-white py-4 px-6 rounded-xl shadow-lg text-xl font-bold">
-            Total a pagar: ${pedido.total}
-          </div>
-        </div>
-
-        {/* VOLVER */}
-        <div className="mt-8 flex justify-start">
-          <a
-            href="/admin/pedidos"
-            className="flex items-center gap-2 bg-gray-700 hover:bg-gray-800 text-white px-6 py-3 rounded-xl text-lg shadow-md transition"
-          >
-            <FaArrowLeft /> Volver
-          </a>
-        </div>
+        <a
+          href="/admin/pedidos"
+          className="inline-flex items-center gap-2 mt-6 bg-gray-700 text-white px-5 py-2 rounded-lg"
+        >
+          <FaArrowLeft /> Volver
+        </a>
       </div>
     </div>
   );
