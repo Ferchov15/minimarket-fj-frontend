@@ -16,13 +16,11 @@ export default function LoginPage() {
     setError("");
 
     try {
-      console.log("API_URL:", API_URL);
-      
       const res = await fetch(`${API_URL}/api/usuarios/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ correo, contrasena }),
         credentials: "include",
+        body: JSON.stringify({ correo, contrasena }),
       });
 
       const data = await res.json();
@@ -31,6 +29,8 @@ export default function LoginPage() {
         setError(data.mensaje || "Credenciales incorrectas");
         return;
       }
+
+      document.cookie = "admin_auth=true; path=/; max-age=7200";
 
       router.push("/admin/dashboard");
     } catch (err) {
