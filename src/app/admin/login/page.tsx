@@ -105,10 +105,10 @@ export default function LoginPage() {
         <Image
           src="/imagenes/fondo1.avif"
           alt="Imagen de fondo"
-          fill // Esto hace que ocupe todo el contenedor relativo
-          priority // Carga la imagen con prioridad (importante para el login)
+          fill 
+          priority 
           className="object-cover"
-          sizes="50vw" // Le dice a Next que la imagen ocupará la mitad del ancho
+          sizes="50vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--primary-700)] to-transparent opacity-50"></div>
       </div>
