@@ -89,6 +89,23 @@ export default function ProductosAdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-10">
+      {/* BOTÓN FLOTANTE PARA REGRESAR AL DASHBOARD (visible siempre) */}
+      <button
+        onClick={() => router.push("/admin/dashboard")}
+        className="fixed bottom-6 right-6 z-50 bg-gray-800 hover:bg-gray-900 text-white p-4 rounded-full shadow-2xl transition-all hover:scale-110 border-4 border-white"
+        title="Regresar al Dashboard"
+      >
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          className="h-6 w-6" 
+          fill="none" 
+          viewBox="0 0 24 24" 
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+      </button>
+
       <div className="max-w-7xl mx-auto bg-white p-4 sm:p-6 lg:p-8 rounded-2xl shadow-xl">
 
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 text-center text-gray-800">
@@ -132,11 +149,13 @@ export default function ProductosAdminPage() {
           </div>
         </div>
 
+        {/* CONTADOR DE PRODUCTOS */}
         <div className="mb-4 text-sm text-gray-600 font-medium">
           Mostrando <span className="font-bold text-gray-800">{productosFiltrados.length}</span> producto{productosFiltrados.length !== 1 ? 's' : ''}
           {filtroCategoria !== "todas" && <span> en categoría <span className="font-bold">{filtroCategoria}</span></span>}
         </div>
 
+        {/* VISTA MOBILE - CARDS (sin scroll horizontal) */}
         <div className="lg:hidden space-y-4">
           {productosFiltrados.length === 0 ? (
             <div className="text-center py-16 px-4">
@@ -206,7 +225,6 @@ export default function ProductosAdminPage() {
           )}
         </div>
 
-        {/* VISTA DESKTOP - TABLA */}
         <div className="hidden lg:block overflow-hidden rounded-xl shadow-lg border-2 border-gray-200">
           <table className="w-full border-collapse">
             <thead>
