@@ -7,7 +7,6 @@ interface Product {
   name: string;
   descripcion?: string;
   price: number | string;
-  descuento?: number | string;
   image: string;
   stock?: number;
 }
@@ -15,12 +14,7 @@ interface Product {
 export default function ProductCard({ product }: { product: Product }) {
   const { addToCart, cartItems } = useCart();
   const priceNumber = Number(product.price) || 0;
-  const descuentoNumber = Number(product.descuento) || 0;
   const productId = Number(product.id);
-
-  const precioFinal = descuentoNumber > 0 
-    ? priceNumber - (priceNumber * descuentoNumber) / 100 
-    : priceNumber;
 
   const imageSrc = product.image?.trim() ? product.image : "/product-placeholder.png";
   const [stockVisible, setStockVisible] = useState(product.stock ?? 0);
@@ -36,7 +30,7 @@ export default function ProductCard({ product }: { product: Product }) {
     addToCart({
       id: productId,
       name: product.name,
-      price: precioFinal,
+      price: priceNumber,
       stock: product.stock ?? 0,
       image: product.image,
     });
@@ -58,28 +52,19 @@ export default function ProductCard({ product }: { product: Product }) {
       </h3>
 
       <div className="w-full border-b border-black/20 mb-2 pb-2">
-        <p className="font-bold text-sm sm:text-lg">
-          {descuentoNumber > 0 && (
-            <span className="line-through mr-2 text-xs text-gray-700 opacity-70">
-              ${priceNumber.toFixed(2)}
-            </span>
-          )}
-          ${precioFinal.toFixed(2)} 
-          <span className="text-[10px] ml-1 font-normal">Inc. IVA</span>
+        <p className="text-sm sm:text-base">
+          <span className="font-bold">Precio:</span>{" "}
+          <span className="font-bold text-green-700">
+            ${priceNumber.toFixed(2)}
+          </span>
         </p>
-        
-        {descuentoNumber > 0 && (
-          <p className="text-red-800 font-bold text-[10px] sm:text-xs">
-            🔥 {descuentoNumber}% OFF
-          </p>
-        )}
       </div>
 
       <div className="flex-grow w-full mb-3">
-        <p className="text-xs text-gray-800 line-clamp-2 mb-2 italic">
+        <p className="text-sm text-gray-800 line-clamp-2 mb-2 italic">
           {product.descripcion || "Sin descripción"}
         </p>
-        <p className="text-[10px] sm:text-xs">
+        <p className="text-xs sm:text-sm">
           Stock: <span className={stockVisible > 0 ? "text-green-700 font-bold" : "text-red-600 font-bold"}>
             {stockVisible > 0 ? `${stockVisible} un.` : "Agotado"}
           </span>
